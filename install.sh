@@ -56,7 +56,7 @@ if [[ -n ${_BUILD_ARG_SHOVEL} ]]; then
         wget -O "${HOME}/Shovel/shims/shovel.${ext}" "${supportURL}/shovel.${ext}"
     done
 
-    sudo chmod +x ~/Shovel/apps/shims/*
+    sudo chmod +x ~/Shovel/shims/*
 
     cat <<EOF >> /etc/profile.d/01-shovel.sh
 export SCOOP=~/Shovel
