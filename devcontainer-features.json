@@ -30,6 +30,11 @@
                     "default": "NEW",
                     "description": "Branch to be used as default",
                 },
+                "localrepo": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Use local repository as Shovel/apps/scoop/current. Cloned folder will be renamed using postfix .orig",
+                },
             },
             "include": [
                 "ubuntu",

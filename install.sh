@@ -50,7 +50,7 @@ EOF
     touch "${prof}"
 
     cat <<EOF >> "${prof}"
-\$ps = 'pwsh@' + '\$PSVersionTable.PSVersion.ToString()
+\$ps = 'pwsh@' + \$PSVersionTable.PSVersion.ToString()
 \$env:__SHELL_INFORMATION_POSH_258__ = "\$ps@${arch}"
 Invoke-Expression (@(oh-my-posh prompt init 'pwsh' --print --config '${themePath}') -join "\`n")
 Enable-PoshTransientPrompt
@@ -60,20 +60,28 @@ fi
 if [[ -n ${_BUILD_ARG_SHOVEL} ]]; then
     echo "Activating feature 'shovel'"
 
+    SCOOP="${HOME}/Shovel"
+    SCOOP_HOME="${SCOOP}/apps/scoop/current"
+    SCOOP_GLOBAL="/opt/Shovel"
+
     defBranch=${_BUILD_ARG_SHOVEL_BRANCH:-'NEW'}
     supportURL='https://raw.githubusercontent.com/shovel-org/Dockers/main/support'
 
-    mkdir -p ~/.config/scoop /opt/Shovel/{apps,shims} ~/Shovel/{apps,shims,buckets,cache}
+    mkdir -p ~/.config/scoop "${SCOOP_GLOBAL}"/{apps,shims} "${SCOOP}"/{apps,shims,buckets,cache}
 
-    git clone --branch "$defBranch" https://github.com/Ash258/Scoop-Core.git ~/Shovel/apps/scoop/current/
-    wget -O- "${supportURL}/config.json" | sed 's/main/NEW/g' > ~/.config/scoop/config.json
+    git clone --branch "$defBranch" "https://github.com/Ash258/Scoop-Core.git" "${SCOOP_HOME}"
+    wget -O- "${supportURL}/config.json" | sed "s/main/${defBranch}/g" > ~/.config/scoop/config.json
 
-    wget -O "${HOME}/Shovel/shims/shovel" "${supportURL}/shovel"
+    wget -O "${SCOOP}/shims/shovel" "${supportURL}/shovel"
     for ext in $(echo ps1 cmd); do
-        wget -O "${HOME}/Shovel/shims/shovel.${ext}" "${supportURL}/shovel.${ext}"
+        wget -O "${SCOOP}/shims/shovel.${ext}" "${supportURL}/shovel.${ext}"
     done
 
-    sudo chmod +x ~/Shovel/shims/*
+    if [[ -n ${_BUILD_ARG_OH_MY_POSH_LOCALREPO} ]]; then
+        mv "${SCOOP_HOME}" "${SCOOP_HOME}.orig"
+    fi
+
+    sudo chmod +x "${SCOOP}/shims"/*
 
     cat <<EOF >> /etc/profile.d/01-shovel.sh
 export SCOOP=~/Shovel
