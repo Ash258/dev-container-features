@@ -1,65 +1,41 @@
 #!/bin/bash
 set -e
 
-# The install.sh script is the installation entrypoint for any dev container 'features' in this repository. 
+# The install.sh script is the installation entrypoint for any dev container 'features' in this repository.
 #
-# The tooling will parse the devcontainer-features.json + user devcontainer, and write 
+# The tooling will parse the devcontainer-features.json + user devcontainer, and write
 # any build-time arguments into a feature-set scoped "devcontainer-features.env"
 # The author is free to source that file and use it however they would like.
 set -a
 . ./devcontainer-features.env
 set +a
 
+if [[ -n ${_BUILD_ARG_OH_MY_POSH} ]]; then
+    echo "Activating feature 'oh-my-posh'"
 
-if [ ! -z ${_BUILD_ARG_HELLOWORLD} ]; then
-    echo "Activating feature 'helloworld'"
+    themeURL=${_BUILD_ARG_OH_MY_POSH_THEMEFILE:-'https://raw.githubusercontent.com/Ash258/Shovel-Ash258/main/support/oh-my-posh/Ash258.yml'}
+    themeName=${themeURL##*/}
+    themePath="/var/OHM-${themeName}"
+    arch=$(uname -m)
+    if [[ $arch == 'x86_64' ]]; then
+        arch='amd64'
+    elif [[ $arch == 'aarch64' ]]; then
+        arch='arm64'
+    fi
 
-    # Build args are exposed to this entire feature set following the pattern:  _BUILD_ARG_<FEATURE ID>_<OPTION NAME>
-    GREETING=${_BUILD_ARG_HELLOWORLD_GREETING:-undefined}
+    # Download
+    url="https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-${arch}"
+    wget -O /var/oh-my-posh "$url"
+    wget -O "${themePath}" "${themeURL}"
 
-    tee /usr/hello.sh > /dev/null \
-    << EOF
-    #!/bin/bash
-    RED='\033[0;91m'
-    NC='\033[0m' # No Color
-    echo -e "\${RED}${GREETING}, \$(whoami)!"
-    echo -e "\${NC}"
+    sudo ln -sf /var/oh-my-posh /usr/local/bin/oh-my-posh
+
+    # Create .zshrc
+    cat  <<EOF >> ~/.zshrc
+export __SHELL_INFORMATION_POSH_258__="zsh@\$ZSH_VERSION@$arch"
+eval "\$(oh-my-posh prompt init zsh --print --config '${themePath}')"
+enable_poshtransientprompt
+#endregion Oh-my-posh
 EOF
-
-    chmod +x /usr/hello.sh
-    sudo cat '/usr/hello.sh' > /usr/local/bin/hello
-    sudo chmod +x /usr/local/bin/hello
-fi
-
-
-if [ ! -z ${_BUILD_ARG_COLOR} ]; then
-    echo "Activating feature 'color'"
-
-    # Build args are exposed to this entire feature set following the pattern:  _BUILD_ARG_<FEATURE ID>_<OPTION NAME>
-
-    if [ "${_BUILD_ARG_COLOR_FAVORITE}" == "red" ]; then
-        FAVORITE='\\033[0\;91m'
-    fi
-
-    if [ "${_BUILD_ARG_COLOR_FAVORITE}" == "green" ]; then
-        FAVORITE='\\033[0\;32m'
-    fi
-
-    if [ "${_BUILD_ARG_COLOR_FAVORITE}" == "gold" ]; then
-        FAVORITE='\\033[0\;33m'
-    fi
-
-    tee /usr/color.sh > /dev/null \
-    << EOF
-    #!/bin/bash
-    NC='\033[0m' # No Color
-
-    FAVORITE=${FAVORITE}
-    echo -e "\${FAVORITE} This is my favorite color! \${NC}"
-EOF
-
-    chmod +x /usr/color.sh
-    sudo cat '/usr/color.sh' > /usr/local/bin/color
-    sudo chmod +x /usr/local/bin/color
-
+    sudo chmod +x /usr/local/bin/oh-my-posh
 fi
