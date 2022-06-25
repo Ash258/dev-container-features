@@ -18,5 +18,23 @@
                 "alpine",
             ],
         },
+        {
+            "id": "shovel",
+            "options": {
+                "branch": {
+                    "type": "string",
+                    "proposals": [
+                        "main",
+                        "NEW",
+                    ],
+                    "default": "NEW",
+                    "description": "Branch to be used as default",
+                },
+            },
+            "include": [
+                "ubuntu",
+                "alpine",
+            ],
+        },
     ],
 }

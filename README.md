@@ -1,6 +1,16 @@
 > ⚠️ NOTE: This functionality is in PREVIEW. Please note it is subject to (heavy) modification!  
+<!-- TOOD: Rework -->
 
-# Development container `features` Template
+# Test
+
+```bash
+# Manually create devcontainer-features.env
+docker run -v "${PWD}:/test" -ti mcr.microsoft.com/vscode/devcontainers/base:alpine bash
+cd test
+./install.sh
+```
+
+# Development container `features`
 
 To create your own remote [**dev container features**](https://code.visualstudio.com/docs/remote/containers#_dev-container-features-preview), use this repo as a template.  This repo contains two example "features" called `helloworld` and `color`.  
 

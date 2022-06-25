@@ -39,3 +39,31 @@ enable_poshtransientprompt
 EOF
     sudo chmod +x /usr/local/bin/oh-my-posh
 fi
+
+if [[ -n ${_BUILD_ARG_SHOVEL} ]]; then
+    echo "Activating feature 'shovel'"
+
+    defBranch=${_BUILD_ARG_SHOVEL_BRANCH:-'NEW'}
+    supportURL='https://raw.githubusercontent.com/shovel-org/Dockers/main/support'
+
+    mkdir -p ~/.config/scoop /opt/Shovel/{apps,shims} ~/Shovel/{apps,shims,buckets,cache}
+
+    git clone --branch "$defBranch" https://github.com/Ash258/Scoop-Core.git ~/Shovel/apps/scoop/current/
+    wget -O- "${supportURL}/config.json" | sed 's/main/NEW/g' > ~/.config/scoop/config.json
+
+    wget -O "${HOME}/Shovel/shims/shovel" "${supportURL}/shovel"
+    for ext in $(echo ps1 cmd); do
+        wget -O "${HOME}/Shovel/shims/shovel.${ext}" "${supportURL}/shovel.${ext}"
+    done
+
+    sudo chmod +x ~/Shovel/apps/shims/*
+
+    cat <<EOF >> /etc/profile.d/01-shovel.sh
+export SCOOP=~/Shovel
+export SCOOP_HOME=~/Shovel/apps/scoop/current
+export SCOOP_GLOBAL=/opt/Shovel
+export PATH="\$PATH:/opt/Shovel/shims:~/Shovel/shims"
+EOF
+
+    which pwsh 2>/dev/null || echo 'To proper functionality powershell feature needs to be enabled'
+fi
