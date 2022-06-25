@@ -15,7 +15,7 @@ if [[ -n ${_BUILD_ARG_OH_MY_POSH} ]]; then
 
     themeURL=${_BUILD_ARG_OH_MY_POSH_THEMEFILE:-'https://raw.githubusercontent.com/Ash258/Shovel-Ash258/main/support/oh-my-posh/Ash258.yml'}
     themeName=${themeURL##*/}
-    themePath="/var/OHM-${themeName}"
+    themePath="/var/OMP-${themeName}"
     arch=$(uname -m)
     if [[ $arch == 'x86_64' ]]; then
         arch='amd64'
@@ -25,19 +25,36 @@ if [[ -n ${_BUILD_ARG_OH_MY_POSH} ]]; then
 
     # Download
     url="https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-${arch}"
-    wget -O /var/oh-my-posh "$url"
+    wget -O '/var/oh-my-posh' "${url}"
     wget -O "${themePath}" "${themeURL}"
 
-    sudo ln -sf /var/oh-my-posh /usr/local/bin/oh-my-posh
+    sudo ln -sf '/var/oh-my-posh' '/usr/local/bin/oh-my-posh'
+    sudo chmod +x '/usr/local/bin/oh-my-posh'
 
-    # Create .zshrc
-    cat  <<EOF >> ~/.zshrc
-export __SHELL_INFORMATION_POSH_258__="zsh@\$ZSH_VERSION@$arch"
+    # zsh
+    cat  <<EOF >> "${HOME}/.zshrc"
+export __SHELL_INFORMATION_POSH_258__="zsh@\$ZSH_VERSION@${arch}"
 eval "\$(oh-my-posh prompt init zsh --print --config '${themePath}')"
 enable_poshtransientprompt
-#endregion Oh-my-posh
 EOF
-    sudo chmod +x /usr/local/bin/oh-my-posh
+
+    # bash
+    cat  <<EOF >> "${HOME}/.bashrc"
+export __SHELL_INFORMATION_POSH_258__="bash@\$BASH_VERSION@${arch}"
+eval "\$(oh-my-posh prompt init bash --print --config '${themePath}')"
+EOF
+
+    # pwsh
+    prof="${HOME}/.config/powershell/Microsoft.PowerShell_profile.ps1"
+    mkdir -p ~/.config/powershell
+    touch "${prof}"
+
+    cat <<EOF >> "${prof}"
+\$ps = 'pwsh@' + '\$PSVersionTable.PSVersion.ToString()
+\$env:__SHELL_INFORMATION_POSH_258__ = "\$ps@${arch}"
+Invoke-Expression (@(oh-my-posh prompt init 'pwsh' --print --config '${themePath}') -join "\`n")
+Enable-PoshTransientPrompt
+EOF
 fi
 
 if [[ -n ${_BUILD_ARG_SHOVEL} ]]; then
@@ -62,7 +79,7 @@ if [[ -n ${_BUILD_ARG_SHOVEL} ]]; then
 export SCOOP=~/Shovel
 export SCOOP_HOME=~/Shovel/apps/scoop/current
 export SCOOP_GLOBAL=/opt/Shovel
-export PATH="\$PATH:/opt/Shovel/shims:~/Shovel/shims"
+export PATH="\$PATH:/opt/Shovel/shims:\$HOME/Shovel/shims"
 EOF
 
     which pwsh 2>/dev/null || echo 'To proper functionality powershell feature needs to be enabled'
