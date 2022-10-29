@@ -7,6 +7,7 @@ set -e
 # any build-time arguments into a feature-set scoped "devcontainer-features.env"
 # The author is free to source that file and use it however they would like.
 set -a
+# shellcheck disable=SC1091
 . ./devcontainer-features.env
 set +a
 

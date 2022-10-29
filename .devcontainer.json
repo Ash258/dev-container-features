@@ -1,19 +1,29 @@
 {
-    "image": "mcr.microsoft.com/devcontainers/javascript-node",
-    "remoteUser": "node",
-    "postCreateCommand": "npm install -g @devcontainers/cli && npm i -g bash-language-server",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "remoteUser": "vscode",
+    "postCreateCommand": "npm install -g @devcontainers/cli",
     "features": {
+        "ghcr.io/devcontainers/features/node": {},
         "Ash258/dev-container-features/shellcheck": {}
     },
     "customizations": {
         "vscode": {
             "settings": {
-                "bashIde.explainshellEndpoint": "http://localhost:5000"
-            },
-            "extensions": [
-                "mads-hartmann.bash-ide-vscode",
-                "timonwong.shellcheck"
-            ]
+                "shellcheck.enable": true,
+                "shellcheck.executablePath": "/bin/shellcheck",
+                "shellcheck.run": "onSave",
+                "shellcheck.useWorkspaceRootAsCwd": false
+            }
         }
-    }
+    },
+    "extensions": [
+        "davidanson.vscode-markdownlint",
+        "eamodio.gitlens",
+        "editorconfig.editorconfig",
+        "github.vscode-pull-request-github",
+        "mads-hartmann.bash-ide-vscode",
+        "timonwong.shellcheck",
+        "usernamehw.errorlens",
+        "yzhang.markdown-all-in-one"
+    ]
 }
