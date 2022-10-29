@@ -41,5 +41,20 @@
                 "alpine",
             ],
         },
+        {
+            "id": "shellcheck",
+            "options": {
+                "version": {
+                    "type": "string",
+                    "proposals": [
+                        "latest",
+                        "0.8.0",
+                        "0.7.2"
+                    ],
+                    "default": "latest",
+                    "description": "Specific version of shellcheck to be installed"
+                }
+            }
+        }
     ],
 }

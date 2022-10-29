@@ -1,0 +1,19 @@
+{
+    "image": "mcr.microsoft.com/devcontainers/javascript-node:0-18",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "bashIde.explainshellEndpoint": "http://localhost:5000"
+            },
+            "extensions": [
+                "mads-hartmann.bash-ide-vscode",
+                "timonwong.shellcheck"
+            ]
+        }
+    },
+    "features": {
+        "Ash258/dev-container-features/shellcheck": {},
+    },
+    "remoteUser": "node",
+    "postCreateCommand": "npm install -g @devcontainers/cli && npm i -g bash-language-server"
+}

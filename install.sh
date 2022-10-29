@@ -10,10 +10,12 @@ set -a
 . ./devcontainer-features.env
 set +a
 
+test -d "${HOME}/.local/bin" || mkdir -p "${HOME}/.local/bin"
+
 if [[ -n ${_BUILD_ARG_OH_MY_POSH} ]]; then
     echo "Activating feature 'oh-my-posh'"
 
-    themeURL=${_BUILD_ARG_OH_MY_POSH_THEMEFILE:-'https://raw.githubusercontent.com/Ash258/Shovel-Ash258/main/support/oh-my-posh/Ash258.yml'}
+    themeURL=${_BUILD_ARG_OH_MY_POSH_THEMEFILE:-https://raw.githubusercontent.com/Ash258/Shovel-Ash258/main/support/oh-my-posh/Ash258.yml}
     themeName=${themeURL##*/}
     themePath="/var/OMP-${themeName}"
     arch=$(uname -m)
@@ -64,7 +66,7 @@ if [[ -n ${_BUILD_ARG_SHOVEL} ]]; then
     SCOOP_HOME="${SCOOP}/apps/scoop/current"
     SCOOP_GLOBAL="/opt/Shovel"
 
-    defBranch=${_BUILD_ARG_SHOVEL_BRANCH:-'NEW'}
+    defBranch=${_BUILD_ARG_SHOVEL_BRANCH:-NEW}
     supportURL='https://raw.githubusercontent.com/shovel-org/Dockers/main/support'
 
     mkdir -p ~/.config/scoop "${SCOOP_GLOBAL}"/{apps,shims} "${SCOOP}"/{apps,shims,buckets,cache}
@@ -85,10 +87,36 @@ if [[ -n ${_BUILD_ARG_SHOVEL} ]]; then
 
     cat <<EOF >> /etc/profile.d/01-shovel.sh
 export SCOOP=~/Shovel
+export SHOVEL=~/Shovel
 export SCOOP_HOME=~/Shovel/apps/scoop/current
+export SHOVEL_HOME=~/Shovel/apps/scoop/current
 export SCOOP_GLOBAL=/opt/Shovel
+export SHOVEL_GLOBAL=/opt/Shovel
 export PATH="\$PATH:/opt/Shovel/shims:\$HOME/Shovel/shims"
 EOF
 
     which pwsh 2>/dev/null || echo 'To proper functionality powershell feature needs to be enabled'
+fi
+
+if [[ -n ${_BUILD_ARG_SHELLCHECK} ]]; then
+    test -d "${HOME}/.local/bin" || mkdir -p "${HOME}/.local/bin"
+
+    os=$(uname -s | tr '[:upper:]' '[:lower:]')
+    localShellCheckFile="${HOME}/.local/bin/shellcheck"
+    version="${_BUILD_ARG_SHELLCHECK_VERSION:-latest}"
+
+    if [[ "${version}" == "latest" ]]; then
+        latest=$(wget -O- 'https://api.github.com/repos/koalaman/shellcheck/releases/latest' | grep 'tag_name' | sed 's/.*"v\([0-9.]*\)",.*/\1/' )
+        version="${latest}"
+    fi
+
+    shellcheckUrl="https://github.com/koalaman/shellcheck/releases/download/v${version}/shellcheck-v${version}.${os}.$(uname -m).tar.xz"
+    wget -O "${localShellCheckFile}.tar.xz" "${shellcheckUrl}"
+    tar xf "${localShellCheckFile}.tar.xz" -C "${HOME}/.local/bin"
+    mv "${localShellCheckFile}-v${version}/shellcheck" "${HOME}/.local/bin/shellcheck"
+
+    rm -rf "${localShellCheckFile}.tar.xz" "${localShellCheckFile}-v${version}/"
+
+    chmod +x "${localShellCheckFile}"
+    shellcheck --version
 fi
