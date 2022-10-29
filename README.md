@@ -23,8 +23,7 @@ Install shellcheck
 
 ```bash
 # Manually create devcontainer-features.env
-docker run -v "${PWD}:/test" -ti mcr.microsoft.com/vscode/devcontainers/base:alpine bash
-cd /test
+docker run -v "${PWD}:/test" -w '/test' -ti mcr.microsoft.com/vscode/devcontainers/base:alpine bash
 test -f devcontainer-features.env || cp devcontainer-features.env.example devcontainer-features.env
 ./install.sh
 ```

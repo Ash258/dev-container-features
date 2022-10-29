@@ -10,8 +10,6 @@ set -a
 . ./devcontainer-features.env
 set +a
 
-test -d "${HOME}/.local/bin" || mkdir -p "${HOME}/.local/bin"
-
 if [[ -n ${_BUILD_ARG_OH_MY_POSH} ]]; then
     echo "Activating feature 'oh-my-posh'"
 
@@ -99,10 +97,8 @@ EOF
 fi
 
 if [[ -n ${_BUILD_ARG_SHELLCHECK} ]]; then
-    test -d "${HOME}/.local/bin" || mkdir -p "${HOME}/.local/bin"
-
     os=$(uname -s | tr '[:upper:]' '[:lower:]')
-    localShellCheckFile="${HOME}/.local/bin/shellcheck"
+    localShellCheckFile="/bin/shellcheck"
     version="${_BUILD_ARG_SHELLCHECK_VERSION:-latest}"
 
     if [[ "${version}" == "latest" ]]; then
@@ -112,8 +108,8 @@ if [[ -n ${_BUILD_ARG_SHELLCHECK} ]]; then
 
     shellcheckUrl="https://github.com/koalaman/shellcheck/releases/download/v${version}/shellcheck-v${version}.${os}.$(uname -m).tar.xz"
     wget -O "${localShellCheckFile}.tar.xz" "${shellcheckUrl}"
-    tar xf "${localShellCheckFile}.tar.xz" -C "${HOME}/.local/bin"
-    mv "${localShellCheckFile}-v${version}/shellcheck" "${HOME}/.local/bin/shellcheck"
+    tar xf "${localShellCheckFile}.tar.xz" -C /bin
+    mv "${localShellCheckFile}-v${version}/shellcheck" "${localShellCheckFile}"
 
     rm -rf "${localShellCheckFile}.tar.xz" "${localShellCheckFile}-v${version}/"
 

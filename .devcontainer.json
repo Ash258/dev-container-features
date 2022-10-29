@@ -1,5 +1,10 @@
 {
-    "image": "mcr.microsoft.com/devcontainers/javascript-node:0-18",
+    "image": "mcr.microsoft.com/devcontainers/javascript-node",
+    "remoteUser": "node",
+    "postCreateCommand": "npm install -g @devcontainers/cli && npm i -g bash-language-server",
+    "features": {
+        "Ash258/dev-container-features/shellcheck": {}
+    },
     "customizations": {
         "vscode": {
             "settings": {
@@ -10,10 +15,5 @@
                 "timonwong.shellcheck"
             ]
         }
-    },
-    "features": {
-        "Ash258/dev-container-features/shellcheck": {},
-    },
-    "remoteUser": "node",
-    "postCreateCommand": "npm install -g @devcontainers/cli && npm i -g bash-language-server"
+    }
 }
