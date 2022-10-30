@@ -32,30 +32,61 @@ if [[ -n ${_BUILD_ARG_OH_MY_POSH} ]]; then
     sudo ln -sf '/var/oh-my-posh' '/usr/local/bin/oh-my-posh'
     sudo chmod +x '/usr/local/bin/oh-my-posh'
 
+    # Per user configuration
+    comment='# OMP'
+    users=()
+    if [[ -n ${_BUILD_ARG_OH_MY_POSH_CONFIGALLUSERS} ]]; then
+        USERNAME=${USERNAME:-"automatic"}
+        if [ "${USERNAME}" = "auto" ] || [ "${USERNAME}" = "automatic" ]; then
+            POSSIBLE_USERS=("vscode" "node" "codespace" "$(awk -v val=1000 -F ":" '$3==val{print $1}' /etc/passwd)")
+            for CURRENT_USER in "${POSSIBLE_USERS[@]}"; do
+                if id -u "${CURRENT_USER}" > /dev/null 2>&1; then
+                    users+=("$CURRENT_USER")
+                fi
+            done
+        fi
+    elif [[ ${_BUILD_ARG_OH_MY_POSH_USERS} != "" ]]; then
+        IFS=',' read -ra users <<< "${_BUILD_ARG_OH_MY_POSH_USERS}"
+    fi
+    users+=('root')
+
     # zsh
-    cat  <<EOF >> "${HOME}/.zshrc"
+    cat <<EOF >> /tmp/zshrc.tmpl
+
+${comment}
 export __SHELL_INFORMATION_POSH_258__="zsh@\$ZSH_VERSION@${arch}"
 eval "\$(oh-my-posh prompt init zsh --print --config '${themePath}')"
 enable_poshtransientprompt
 EOF
 
     # bash
-    cat  <<EOF >> "${HOME}/.bashrc"
+    cat <<EOF >> /tmp/bashrc.tmpl
+
+${comment}
 export __SHELL_INFORMATION_POSH_258__="bash@\$BASH_VERSION@${arch}"
 eval "\$(oh-my-posh prompt init bash --print --config '${themePath}')"
 EOF
 
     # pwsh
-    prof="${HOME}/.config/powershell/Microsoft.PowerShell_profile.ps1"
-    mkdir -p ~/.config/powershell
-    touch "${prof}"
+    cat <<EOF >> /tmp/pwsh.tmpl
 
-    cat <<EOF >> "${prof}"
+${comment}
 \$ps = 'pwsh@' + \$PSVersionTable.PSVersion.ToString()
 \$env:__SHELL_INFORMATION_POSH_258__ = "\$ps@${arch}"
-Invoke-Expression (@(oh-my-posh prompt init 'pwsh' --print --config '${themePath}') -join "\`n")
+oh-my-posh prompt init 'pwsh' --print --config '${themePath}' | Out-String | Invoke-Expression
 Enable-PoshTransientPrompt
 EOF
+
+    chmod 444 /tmp/*.tmpl
+    pwshc='.config/powershell/Microsoft.PowerShell_profile.ps1'
+
+    for i in "${users[@]}"; do
+        su "${i}" -c "cp ~/.zshrc ~/.zshrc.back; cat ~/.zshrc /tmp/zshrc.tmpl 2>/dev/null > ~/.zshrc"
+        su "${i}" -c "cp ~/.bashrc ~/.bashrc.back; cat ~/.bashrc /tmp/bashrc.tmpl 2>/dev/null > ~/.bashrc"
+        su "${i}" -c "mkdir -p ~/.config/powershell && cp ~/${pwshc} ~/${pwshc}.back; cat ~/${pwshc} /tmp/pwsh.tmpl > ~/${pwshc}"
+    done
+
+    rm -rf /tmp/*.tmpl
 fi
 
 if [[ -n ${_BUILD_ARG_SHOVEL} ]]; then
@@ -91,7 +122,7 @@ export SCOOP_HOME=~/Shovel/apps/scoop/current
 export SHOVEL_HOME=~/Shovel/apps/scoop/current
 export SCOOP_GLOBAL=/opt/Shovel
 export SHOVEL_GLOBAL=/opt/Shovel
-export PATH="\$PATH:/opt/Shovel/shims:\$HOME/Shovel/shims"
+export PATH="\$PATH:\${SHOVEL_GLOBAL}/shims:\${SHOVEL}/shims"
 EOF
 
     which pwsh 2>/dev/null || echo 'To proper functionality powershell feature needs to be enabled'

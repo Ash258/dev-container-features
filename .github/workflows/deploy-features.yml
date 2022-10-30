@@ -8,17 +8,17 @@ jobs:
   deploy: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      
+      - uses: actions/checkout@main
+
       - name: Get tag name
-        id: get_tag_name  
+        id: get_tag_name
         run: echo "::set-output name=tag::$(echo "${{ github.ref }}" | grep -oP 'refs/tags/\K(.+)')"
-          
+
       - name: Publish dev container features
         uses: microsoft/publish-dev-container-features-action@main
         with:
           path-to-features: '.'
-          
+
       - name: Get or Create Release at current tag
         uses: ncipollo/release-action@v1
         with:

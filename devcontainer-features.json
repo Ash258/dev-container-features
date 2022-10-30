@@ -12,6 +12,20 @@
                     "default": "https://raw.githubusercontent.com/Ash258/Shovel-Ash258/main/support/oh-my-posh/Ash258.yml",
                     "description": "Theme file to be used",
                 },
+                "users": {
+                    "type": "string",
+                    "proposals": [
+                        "vscode,node",
+                        "vscode"
+                    ],
+                    "default": "",
+                    "description": "List of all users to be configured (other than root)"
+                },
+                "configAllUsers": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Configure for all usual users"
+                }
             },
             "include": [
                 "ubuntu",

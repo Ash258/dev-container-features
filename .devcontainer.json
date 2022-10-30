@@ -1,10 +1,12 @@
 {
+    "name": "Devcontainer features development container",
     "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
     "remoteUser": "vscode",
     "postCreateCommand": "npm install -g @devcontainers/cli",
     "features": {
         "ghcr.io/devcontainers/features/node": {},
-        "Ash258/dev-container-features/shellcheck": {}
+        "Ash258/dev-container-features/shellcheck": {},
+        "Ash258/dev-container-features/oh-my-posh": {}
     },
     "customizations": {
         "vscode": {
